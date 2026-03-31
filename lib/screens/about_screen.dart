@@ -184,13 +184,6 @@ class AboutScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            Text(
-              'v1.0.0 · © 2025 Corey Matthew Crandal',
-              style: GoogleFonts.nunito(
-                color: AppTheme.textSecondary.withOpacity(0.5),
-                fontSize: 12,
-              ),
-            ).animate().fadeIn(delay: 1200.ms),
 
             const SizedBox(height: 32),
           ],

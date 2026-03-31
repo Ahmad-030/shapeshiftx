@@ -23,7 +23,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
   }
 
   Future<void> _initWebView() async {
-    final htmlContent = await rootBundle.loadString('assets/html/privacy_policy.html');
+    final htmlContent = await rootBundle.loadString('assets/privacy_policy.html');
 
     // ✅ Guard against setState after dispose
     if (!mounted) return;

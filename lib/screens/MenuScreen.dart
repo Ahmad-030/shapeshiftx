@@ -247,13 +247,6 @@ class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
 
                   const SizedBox(height: 40),
 
-                  Text(
-                    'v1.0.0 · Corey Matthew Crandal',
-                    style: GoogleFonts.nunito(
-                      color: AppTheme.textSecondary.withOpacity(0.5),
-                      fontSize: 12,
-                    ),
-                  ).animate().fadeIn(delay: 1200.ms),
                 ],
               ),
             ),
