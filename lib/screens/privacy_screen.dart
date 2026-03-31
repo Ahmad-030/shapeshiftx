@@ -13,7 +13,7 @@ class PrivacyScreen extends StatefulWidget {
 }
 
 class _PrivacyScreenState extends State<PrivacyScreen> {
-  late final WebViewController _controller;
+  late final WebViewController _controller; // ✅ Add `late`
   bool _isLoading = true;
 
   @override
@@ -24,15 +24,23 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
 
   Future<void> _initWebView() async {
     final htmlContent = await rootBundle.loadString('assets/html/privacy_policy.html');
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(AppTheme.bg)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) => setState(() => _isLoading = false),
-        ),
-      )
-      ..loadHtmlString(htmlContent);
+
+    // ✅ Guard against setState after dispose
+    if (!mounted) return;
+
+    setState(() {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(AppTheme.bg)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageFinished: (_) {
+              if (mounted) setState(() => _isLoading = false); // ✅ mounted check
+            },
+          ),
+        )
+        ..loadHtmlString(htmlContent);
+    });
   }
 
   @override
@@ -48,14 +56,19 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
         ),
         title: Text(
           'Privacy Policy',
-          style: GoogleFonts.nunito(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
+          style: GoogleFonts.nunito(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller)
-              .animate()
-              .fadeIn(delay: 200.ms, duration: 400.ms),
+          // ✅ Guard against LateInitializationError before controller is ready
+          if (!_isLoading)
+            WebViewWidget(controller: _controller)
+                .animate()
+                .fadeIn(delay: 200.ms, duration: 400.ms),
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(color: AppTheme.accentLight),

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
 import '../models/game_state.dart';
 import 'game_screen.dart';
-import 'splash_screen.dart';
+import 'MenuScreen.dart';
 
 class GameOverScreen extends StatefulWidget {
   final int score;
@@ -151,7 +151,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
                       emoji: '🏠',
                       delay: 800,
                       onTap: () => Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const SplashScreen()),
+                        MaterialPageRoute(builder: (_) => const MenuScreen()),
                             (_) => false,
                       ),
                     ),

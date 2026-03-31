@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shapeshiftx/screens/splash_screen.dart';
 import 'utils/constants.dart';
-import 'screens/splash_screen.dart';
+import 'screens/MenuScreen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
