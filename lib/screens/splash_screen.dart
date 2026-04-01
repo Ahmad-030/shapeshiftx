@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import '../utils/constants.dart';
 import 'MenuScreen.dart';
-
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToMenu() async {
-    await Future.delayed(const Duration(milliseconds: 2600));
+    await Future.delayed(const Duration(milliseconds: 2800));
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: AppTheme.bg,
       body: Stack(
         children: [
-          // Radial glow matching your menu screen style
+          // Radial glow
           Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(
@@ -58,36 +58,24 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Emoji cluster — same as your menu screen logo
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: ['🔴', '🔴', '⭐', '🔴']
-                      .asMap()
-                      .entries
-                      .map((e) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      e.value,
-                      style: TextStyle(
-                        fontSize: e.key == 2 ? 48 : 36,
-                      ),
-                    )
-                        .animate()
-                        .scale(
-                      begin: const Offset(0.0, 0.0),
-                      end: const Offset(1.0, 1.0),
-                      delay: (e.key * 120).ms,
-                      duration: 600.ms,
-                      curve: Curves.elasticOut,
-                    )
-                        .fadeIn(delay: (e.key * 120).ms, duration: 400.ms),
-                  ))
-                      .toList(),
+                // ── Lottie animation ──────────────────────────────────────
+                SizedBox(
+                  width: 240,
+                  height: 240,
+                  child: Lottie.asset(
+                    'assets/shapes.json',
+                    fit: BoxFit.contain,
+                    repeat: true,
+                  ),
+                ).animate().fadeIn(duration: 600.ms).scale(
+                  begin: const Offset(0.6, 0.6),
+                  duration: 700.ms,
+                  curve: Curves.elasticOut,
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
-                // App title with gradient — matches your menu
+                // App title with gradient
                 Text(
                   'ShapeShiftX',
                   style: GoogleFonts.nunito(
@@ -100,16 +88,16 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 )
                     .animate()
-                    .fadeIn(delay: 500.ms, duration: 600.ms)
+                    .fadeIn(delay: 400.ms, duration: 600.ms)
                     .slideY(
                   begin: 0.3,
                   end: 0,
-                  delay: 500.ms,
+                  delay: 400.ms,
                   duration: 600.ms,
                   curve: Curves.easeOut,
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
                 Text(
                   'Find the odd one out!',
@@ -118,11 +106,11 @@ class _SplashScreenState extends State<SplashScreen> {
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
-                ).animate().fadeIn(delay: 800.ms, duration: 500.ms),
+                ).animate().fadeIn(delay: 700.ms, duration: 500.ms),
 
-                const SizedBox(height: 60),
+                const SizedBox(height: 56),
 
-                // Subtle loading dots
+                // Loading dots
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(3, (i) {
@@ -136,7 +124,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                     )
                         .animate(onPlay: (c) => c.repeat())
-                        .fadeIn(delay: (1000 + i * 150).ms, duration: 300.ms)
+                        .fadeIn(delay: (900 + i * 150).ms, duration: 300.ms)
                         .then()
                         .fadeOut(duration: 500.ms)
                         .then()

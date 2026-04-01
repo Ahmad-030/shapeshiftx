@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import '../utils/constants.dart';
 import '../models/game_state.dart';
 import 'game_screen.dart';
@@ -8,27 +9,38 @@ import 'highscore_screen.dart';
 import 'about_screen.dart';
 import 'privacy_screen.dart';
 
-class MenuScreen extends StatefulWidget {        // ✅ was SplashScreen
+class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
 
   @override
-  State<MenuScreen> createState() => _MenuScreenState();  // ✅ was _SplashScreenState
+  State<MenuScreen> createState() => _MenuScreenState();
 }
 
-class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
+class _MenuScreenState extends State<MenuScreen>
     with SingleTickerProviderStateMixin {
   int _highScore = 0;
+  bool _isMusicOn = true;
   final List<String> _floatingEmojis = ['🔴', '⭐', '🍎', '🚗', '⚽', '😀', '🌹', '🔵'];
 
   @override
   void initState() {
     super.initState();
     _loadHighScore();
+    _syncMusicState();
   }
 
   Future<void> _loadHighScore() async {
     final hs = await ScoreService.getHighScore();
     if (mounted) setState(() => _highScore = hs);
+  }
+
+  void _syncMusicState() {
+    setState(() => _isMusicOn = MusicService().isMusicOn);
+  }
+
+  Future<void> _toggleMusic() async {
+    await MusicService().toggle();
+    if (mounted) setState(() => _isMusicOn = MusicService().isMusicOn);
   }
 
   void _startGame() {
@@ -78,11 +90,11 @@ class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
                   .then()
                   .shimmer(duration: 3000.ms, delay: (i * 200).ms)
                   .moveY(
-                    begin: 0,
-                    end: -12,
-                    duration: 2400.ms,
-                    curve: Curves.easeInOut,
-                  )
+                begin: 0,
+                end: -12,
+                duration: 2400.ms,
+                curve: Curves.easeInOut,
+              )
                   .then()
                   .moveY(begin: -12, end: 0, duration: 2400.ms, curve: Curves.easeInOut),
             );
@@ -102,6 +114,45 @@ class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
             ),
           ),
 
+          // ── Music toggle button (top-right) ──────────────────────────────
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12, right: 16),
+                child: GestureDetector(
+                  onTap: _toggleMusic,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.card,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _isMusicOn
+                            ? AppTheme.accentLight.withOpacity(0.4)
+                            : AppTheme.textSecondary.withOpacity(0.2),
+                      ),
+                      boxShadow: _isMusicOn
+                          ? [BoxShadow(color: AppTheme.accent.withOpacity(0.3), blurRadius: 10)]
+                          : null,
+                    ),
+                    child: Icon(
+                      _isMusicOn ? Icons.music_note_rounded : Icons.music_off_rounded,
+                      color: _isMusicOn ? AppTheme.accentLight : AppTheme.textSecondary,
+                      size: 22,
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 300.ms).scale(
+                  begin: const Offset(0.7, 0.7),
+                  delay: 300.ms,
+                  duration: 400.ms,
+                  curve: Curves.elasticOut,
+                ),
+              ),
+            ),
+          ),
+
           // Main content
           SafeArea(
             child: Center(
@@ -110,33 +161,26 @@ class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
                 children: [
                   const SizedBox(height: 20),
 
-                  // Logo emoji cluster
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: ['🔴', '🔴', '⭐', '🔴']
-                        .asMap()
-                        .entries
-                        .map((e) => Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Text(
-                                e.value,
-                                style: TextStyle(
-                                  fontSize: e.key == 2 ? 42 : 32,
-                                ),
-                              )
-                                  .animate()
-                                  .fadeIn(delay: (e.key * 100 + 200).ms, duration: 500.ms)
-                                  .scale(
-                                    begin: const Offset(0.5, 0.5),
-                                    delay: (e.key * 100 + 200).ms,
-                                    duration: 500.ms,
-                                    curve: Curves.elasticOut,
-                                  ),
-                            ))
-                        .toList(),
+                  // ── Lottie animation ────────────────────────────────────
+                  SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Lottie.asset(
+                      'assets/shapes.json',
+                      fit: BoxFit.contain,
+                      repeat: true,
+                    ),
+                  )
+                      .animate()
+                      .fadeIn(delay: 100.ms, duration: 600.ms)
+                      .scale(
+                    begin: const Offset(0.5, 0.5),
+                    delay: 100.ms,
+                    duration: 700.ms,
+                    curve: Curves.elasticOut,
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
 
                   // Title
                   Text(
@@ -163,11 +207,9 @@ class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
                       color: AppTheme.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
-                  )
-                      .animate()
-                      .fadeIn(delay: 600.ms, duration: 500.ms),
+                  ).animate().fadeIn(delay: 600.ms, duration: 500.ms),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // High score badge
                   if (_highScore > 0)
@@ -198,9 +240,9 @@ class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
                         .fadeIn(delay: 700.ms, duration: 500.ms)
                         .scale(begin: const Offset(0.8, 0.8), delay: 700.ms, curve: Curves.elasticOut),
 
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 36),
 
-                  // Play button
+                  // Buttons
                   _MenuButton(
                     label: 'PLAY',
                     emoji: '🎮',
@@ -246,7 +288,6 @@ class _MenuScreenState extends State<MenuScreen>  // ✅ was _SplashScreenState
                   ),
 
                   const SizedBox(height: 40),
-
                 ],
               ),
             ),
@@ -282,8 +323,8 @@ class _MenuButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isPrimary
               ? const LinearGradient(
-                  colors: [AppTheme.accent, AppTheme.accentBlue],
-                )
+            colors: [AppTheme.accent, AppTheme.accentBlue],
+          )
               : null,
           color: isPrimary ? null : AppTheme.card,
           borderRadius: BorderRadius.circular(16),
@@ -294,12 +335,12 @@ class _MenuButton extends StatelessWidget {
           ),
           boxShadow: isPrimary
               ? [
-                  BoxShadow(
-                    color: AppTheme.accent.withOpacity(0.4),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
-                  )
-                ]
+            BoxShadow(
+              color: AppTheme.accent.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            )
+          ]
               : null,
         ),
         child: Row(

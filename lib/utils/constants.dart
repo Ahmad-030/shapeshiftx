@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppTheme {
   static const Color bg = Color(0xFF0D0D1A);
@@ -15,22 +17,70 @@ class AppTheme {
   static const Color gold = Color(0xFFFBBF24);
 
   static ThemeData get theme => ThemeData(
-        scaffoldBackgroundColor: bg,
-        colorScheme: ColorScheme.dark(
-          primary: accent,
-          secondary: accentBlue,
-          surface: surface,
-        ),
-        textTheme: GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme),
-        useMaterial3: true,
-      );
+    scaffoldBackgroundColor: bg,
+    colorScheme: ColorScheme.dark(
+      primary: accent,
+      secondary: accentBlue,
+      surface: surface,
+    ),
+    textTheme: GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme),
+    useMaterial3: true,
+  );
 }
 
-// Emoji groups: [common items (all same), odd item]
-class EmojiSet {
-  final List<String> pool; // items that can appear as "the many"
-  final List<String> odds; // items that are clearly different
+// ─── Music Service ────────────────────────────────────────────────────────────
+class MusicService {
+  static final MusicService _instance = MusicService._internal();
+  factory MusicService() => _instance;
+  MusicService._internal();
 
+  static const String _prefKey = 'music_enabled';
+  final AudioPlayer _player = AudioPlayer();
+  bool _isMusicOn = true;
+  bool _isInitialized = false;
+
+  bool get isMusicOn => _isMusicOn;
+
+  /// Call once at app start (or before first use)
+  Future<void> init() async {
+    if (_isInitialized) return;
+    _isInitialized = true;
+    final prefs = await SharedPreferences.getInstance();
+    _isMusicOn = prefs.getBool(_prefKey) ?? true;
+    await _player.setReleaseMode(ReleaseMode.loop);
+    await _player.setVolume(0.5);
+    if (_isMusicOn) await _play();
+  }
+
+  Future<void> _play() async {
+    try {
+      await _player.play(AssetSource('music.mp3'));
+    } catch (_) {}
+  }
+
+  Future<void> toggle() async {
+    _isMusicOn = !_isMusicOn;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_prefKey, _isMusicOn);
+    if (_isMusicOn) {
+      await _play();
+    } else {
+      await _player.stop();
+    }
+  }
+
+  Future<void> pause() async => await _player.pause();
+  Future<void> resume() async {
+    if (_isMusicOn) await _player.resume();
+  }
+
+  Future<void> stop() async => await _player.stop();
+}
+
+// ─── Emoji Sets ───────────────────────────────────────────────────────────────
+class EmojiSet {
+  final List<String> pool;
+  final List<String> odds;
   const EmojiSet({required this.pool, required this.odds});
 }
 
@@ -61,11 +111,6 @@ class GameConfig {
   });
 
   static GameConfig forLevel(int level) {
-    // Level 1-3: 4 items, 20s
-    // Level 4-6: 6 items, 18s
-    // Level 7-10: 9 items, 16s
-    // Level 11-15: 12 items, 14s
-    // Level 16+: 16-25 items, 10-12s
     if (level <= 3) return GameConfig(gridCount: 4, timerSeconds: 20, level: level);
     if (level <= 6) return GameConfig(gridCount: 6, timerSeconds: 18, level: level);
     if (level <= 10) return GameConfig(gridCount: 9, timerSeconds: 15, level: level);
